@@ -1,0 +1,199 @@
+import pyttsx3 #pip install pyttsx3
+import speech_recognition as sr #pip install speechRecognition
+import datetime
+import wikipedia #pip install wikipedia
+import webbrowser
+import os
+import smtplib
+import pywhatkit as kit
+import wolframalpha
+from requests import get  #for ipaddress
+
+
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+# print(voices[1].id)
+engine.setProperty('voice', voices[1].id)
+
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+
+
+def wishMe():
+    hour = int(datetime.datetime.now().hour)
+    if hour>=0 and hour<12:
+        speak("Good Morning!")
+
+    elif hour>=12 and hour<18:
+        speak("Good Afternoon!")
+
+    else:
+        speak("Good Evening!")
+
+    speak("I am Jarvis Sir. Please tell me how may I help you")
+
+def takeCommand():
+    #It takes microphone input from the user and returns string output
+
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold = 1
+        audio = r.listen(source, timeout=1, phrase_time_limit=5)
+
+    try:
+        print("Recognizing...")
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}\n")
+
+    except Exception as e:
+        # print(e)
+        print("Say that again please...")
+        return "None"
+    return query
+
+def startcommand():
+    #It takes microphone input from the user and returns string output
+
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold=1
+        audio = r.listen(source,timeout=1,phrase_time_limit=5)
+
+    try:
+        print("Recognizing...")
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}\n")
+
+    except Exception as e:
+        # print(e)
+        print("Say that again please...")
+        speak("yes")
+        return "None"
+    return query
+
+def sendEmail(to , message):
+    s = smtplib.SMTP('smtp.gmail.com', 587)
+
+    # start TLS for security
+    s.starttls()
+
+    # Authentication
+    s.login('vprudhviraj551@gmail.com', '6268646026')
+
+    # message to be sent
+   # SUBJECT = "message from jarvis"
+    #content = "it is the first message from jarvis"
+
+    #message = 'Subject: {}\n\n{}'.format(SUBJECT, content)
+
+    # sending the mail
+    s.sendmail('vprudhviraj551@gmail.com', to, message)
+
+    # terminating the session
+    s.quit()
+
+
+if __name__ == "__main__":
+ myDict = {
+        "mom": "jyothivarma778@gmail.com",
+        "daddy": "peddi0001@gmail.com"
+
+    }
+
+
+ while True:
+  query = startcommand().lower()
+  if 'jarvis' in query:
+    speak("yes sir")
+
+    wishMe()
+    while True:
+    #if 1:
+
+        query = takeCommand().lower()
+
+        # Logic for executing tasks based on query
+        if 'wikipedia' in query:
+            speak('Searching Wikipedia...')
+            query = query.replace("wikipedia", "")
+            results = wikipedia.summary(query, sentences=2)
+            speak("According to Wikipedia")
+            print(results)
+            speak(results)
+
+        elif 'open youtube' in query:
+            webbrowser.open("www.youtube.com")
+
+        elif "open whatsapp" in query:
+            webbrowser.open("https://web.whatsapp.com/")
+
+
+
+        elif 'search in google' in query:
+            speak("sir, what should i search on google")
+            cm = takeCommand().lower()
+            webbrowser.open(f"{cm}")
+
+        elif 'open stackoverflow' in query:
+            webbrowser.open("www.stackoverflow.com")
+
+
+        elif 'the time' in query:
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")
+            speak(f"Sir, the time is {strTime}")
+        elif 'open notepad' in  query:
+            npath ="C:\\Windows\\System32\\notepad.exe"
+            os.startfile(npath)
+        elif "open command prompt" in query:
+            os.system("start cmd")
+        elif "ip address" in query:
+            ip = get('https://api.ipify.org').text
+            print(ip)
+            speak(f"your ip address is {ip}")
+        elif "send message" in query:
+            kit.sendwhatmsg("+919666002835", "this message is sent by jarvis",8,30)
+        elif "search in youtube" in query:
+            speak("sir, what should i search")
+            search=takeCommand().lower()
+            kit.playonyt(f"{search}")
+        elif "no thanks" in query:
+            speak("ok sir")
+            break
+            #sys.exit()
+        elif "whatsapp" in query:
+            webbrowser.open("https://web.whatsapp.com/")
+        elif "instagram" in query:
+            webbrowser.open("https://www.instagram.com/")
+        elif "facebook" in query:
+            webbrowser.open("https://www.facebook.com/")
+        elif "google" in query:
+            webbrowser.open("www.google.com")
+        elif "gmail" in query:
+            webbrowser.open("https://mail.google.com/mail/u/0/#inbox")
+
+        elif "send mail" in query:
+            try:
+                speak("sir what is the subject")
+                SUBJECT = takeCommand()
+                speak("and what is the content sir")
+                content = takeCommand()
+
+                message = 'Subject: {}\n\n{}'.format(SUBJECT, content)
+                speak("sir to whom this message is to be sent")
+                sendto = myDict[takeCommand()]
+                to = sendto
+                sendEmail(to, message)
+                speak("mail has been sent")
+            except Exception as e:
+               # print(e)
+             speak("sorry email is not sent")
+
+
+
+
+
+        speak("sir, do u have any work")
